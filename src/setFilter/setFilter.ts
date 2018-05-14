@@ -1,25 +1,34 @@
 import {
     _,
-    BaseFilter,
+    Autowired,
+    BaseFilterComp,
     Component,
+    Context,
     IDoesFilterPassParams,
     ISetFilterParams,
-    SerializedSetFilter,
     QuerySelector,
-    Utils,
     RefSelector,
-    Autowired, ValueFormatterService
+    SerializedSetFilter,
+    Utils,
+    ValueFormatterService
 } from "ag-grid/main";
 import {SetFilterModel, SetFilterModelValuesType} from "./setFilterModel";
 import {SetFilterListItem} from "./setFilterListItem";
 import {VirtualList, VirtualListModel} from "../rendering/virtualList";
 
+
+
 enum CheckboxState {CHECKED, UNCHECKED, INTERMEDIATE}
 
 
-export class SetFilter extends BaseFilter <string, ISetFilterParams, string[] | SerializedSetFilter> {
+export class SetFilter extends BaseFilterComp <string, ISetFilterParams, string[] | SerializedSetFilter> {
 
     private model: SetFilterModel;
+
+    private params:ISetFilterParams;
+
+    @Autowired('context')
+    public context: Context;
 
     @QuerySelector('#selectAll')
     private eSelectAll: HTMLInputElement;
@@ -44,7 +53,9 @@ export class SetFilter extends BaseFilter <string, ISetFilterParams, string[] | 
         super();
     }
 
-    public customInit(): void {
+    public init(params:ISetFilterParams): void {
+        super.init(params);
+        this.setTemplate(this.bodyTemplate());
         let changeFilter: (applyNow?: boolean) => void = (applyNow: boolean = false) => {
             this.onFilterChanged(applyNow);
         };
@@ -242,7 +253,7 @@ export class SetFilter extends BaseFilter <string, ISetFilterParams, string[] | 
         this.virtualList.refresh();
     }
 
-    public bodyTemplate() {
+    public bodyTemplate():string {
         let translate = this.translate.bind(this);
 
         return `<div ref="ag-filter-loading" class="loading-filter ag-hidden">${translate('loadingOoo')}</div>
