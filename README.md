@@ -2,8 +2,8 @@
 ag-Grid-Enterprise
 ==============
 
-This project is now a sub-module of the ag-grid project.
+This project has moved. It is now located as a package inside the ag-grid project.
 
-For the new project, follow this link:
+Follow this link to be taken to the new location:
 
 [https://github.com/ag-grid/ag-grid/tree/master/packages/ag-grid-enterprise](https://github.com/ag-grid/ag-grid/tree/master/packages/ag-grid-enterprise)
