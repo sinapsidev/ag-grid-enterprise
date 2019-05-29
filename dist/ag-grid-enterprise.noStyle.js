@@ -20232,7 +20232,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return _this;
 	    }
 	    DateFloatingFilterComp.prototype.init = function (params) {
-	        this.onFloatingFilterChanged = params.onFloatingFilterChanged;
+	        var _this = this;
+	        this.onFloatingFilterChanged = function (p) {
+	            console.log("onFloatingFilterChanged", p);
+	            params.onFloatingFilterChanged(p);
+	        };
 	        this.currentParentModel = params.currentParentModel;
 	        var debounceMs = params.debounceMs != null ? params.debounceMs : 500;
 	        var toDebounce = utils_1._.debounce(this.onDateChanged.bind(this), debounceMs);
@@ -20240,11 +20244,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            onDateChanged: toDebounce
 	        };
 	        this.dateComponentPromise = this.componentRecipes.newDateComponent(dateComponentParams);
-	        var body = utils_1._.loadTemplate("<div></div>");
+	        this.body = utils_1._.loadTemplate('<div class="ag-show-date">' +
+	            '    <span id="ag-filter-greather-than-today">Da oggi</span>' +
+	            '    <span id="ag-filter-less-than-today">Fino ad oggi</span>' +
+	            '</div>');
 	        this.dateComponentPromise.then(function (dateComponent) {
-	            body.appendChild(dateComponent.getGui());
+	            _this.body.appendChild(dateComponent.getGui());
 	        });
-	        this.setTemplateFromElement(body);
+	        this.setTemplateFromElement(this.body);
 	    };
 	    DateFloatingFilterComp.prototype.onDateChanged = function () {
 	        var parentModel = this.currentParentModel();
@@ -20281,6 +20288,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	    };
 	    DateFloatingFilterComp.prototype.onParentModelChanged = function (parentModel) {
+	        console.log("onParentModelChanged: ", parentModel);
+	        var type = parentModel && parentModel.type;
+	        if (type === "greaterThanToday") {
+	            this.body.classList.remove("ag-show-date");
+	            this.body.classList.add("ag-show-greater-than-today");
+	            this.body.classList.remove("ag-show-less-than-today");
+	        }
+	        else if (type === "lessThanToday") {
+	            this.body.classList.remove("ag-show-date");
+	            this.body.classList.remove("ag-show-greater-than-today");
+	            this.body.classList.add("ag-show-less-than-today");
+	        }
+	        else {
+	            this.body.classList.add("ag-show-date");
+	            this.body.classList.remove("ag-show-greater-than-today");
+	            this.body.classList.remove("ag-show-less-than-today");
+	        }
 	        this.lastKnownModel = parentModel;
 	        this.dateComponentPromise.then(function (dateComponent) {
 	            if (!parentModel || !parentModel.dateFrom) {

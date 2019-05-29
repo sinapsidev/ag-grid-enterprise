@@ -39,6 +39,6 @@
     "gulp-rename": "1.2.2"
   },
   "dependencies": {
-    "ag-grid": "git+ssh://git@github.com/sinapsidev/ag-grid.git#16.0.1.1"
+    "ag-grid": "git+ssh://git@github.com/sinapsidev/ag-grid.git#16.0.1.2"
   }
 }
