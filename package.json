@@ -7,7 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "watchWebpack": "webpack --watch",
-    "build":"gulp release"
+    "build": "gulp release"
   },
   "repository": {
     "type": "git",
@@ -38,8 +38,7 @@
     "css-loader": "0.23.1",
     "gulp-rename": "1.2.2"
   },
-  "peerDependencies": {
-    "ag-grid": "^16.0.0"
-  },
-  "dependencies": {}
+  "dependencies": {
+    "ag-grid": "git+ssh://git@github.com/sinapsidev/ag-grid.git#16.0.1.1"
+  }
 }

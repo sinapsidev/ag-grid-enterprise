@@ -20452,7 +20452,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	    };
 	    DateFilter.prototype.getApplicableFilterTypes = function () {
-	        return [baseFilter_1.BaseFilter.EQUALS, baseFilter_1.BaseFilter.GREATER_THAN, baseFilter_1.BaseFilter.LESS_THAN, baseFilter_1.BaseFilter.NOT_EQUAL, baseFilter_1.BaseFilter.IN_RANGE];
+	        return [baseFilter_1.BaseFilter.EQUALS, baseFilter_1.BaseFilter.GREATER_THAN_TODAY, baseFilter_1.BaseFilter.GREATER_THAN, baseFilter_1.BaseFilter.LESS_THAN, baseFilter_1.BaseFilter.LESS_THAN_TODAY, baseFilter_1.BaseFilter.NOT_EQUAL, baseFilter_1.BaseFilter.IN_RANGE];
 	    };
 	    DateFilter.prototype.bodyTemplate = function () {
 	        return "<div class=\"ag-filter-body\">\n                    <div class=\"ag-filter-date-from\" id=\"filterDateFromPanel\">\n                    </div>\n                    <div class=\"ag-filter-date-to\" id=\"filterDateToPanel\">\n                    </div>\n                </div>";
@@ -20486,7 +20486,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.onFilterChanged();
 	    };
 	    DateFilter.prototype.refreshFilterBodyUi = function () {
+	        var visibleFrom = this.filter !== baseFilter_1.BaseFilter.GREATER_THAN_TODAY && this.filter !== baseFilter_1.BaseFilter.LESS_THAN_TODAY;
 	        var visible = this.filter === baseFilter_1.BaseFilter.IN_RANGE;
+	        visible = (this.filter === baseFilter_1.BaseFilter.GREATER_THAN_TODAY || this.filter === baseFilter_1.BaseFilter.LESS_THAN_TODAY) ? false : visible;
+	        utils_1.Utils.setVisible(this.eDateFromPanel, visibleFrom);
 	        utils_1.Utils.setVisible(this.eDateToPanel, visible);
 	    };
 	    DateFilter.prototype.comparator = function () {
@@ -20512,9 +20515,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	    };
 	    DateFilter.prototype.filterValues = function () {
-	        return this.filter !== baseFilter_1.BaseFilter.IN_RANGE ?
-	            this.dateFromComponent.getDate() :
-	            [this.dateFromComponent.getDate(), this.dateToComponent.getDate()];
+	        var toReturn;
+	        if (this.filter === baseFilter_1.BaseFilter.IN_RANGE) {
+	            toReturn = [this.dateFromComponent.getDate(), this.dateToComponent.getDate()];
+	            return toReturn;
+	        }
+	        if (this.filter === baseFilter_1.BaseFilter.GREATER_THAN_TODAY || this.filter === baseFilter_1.BaseFilter.LESS_THAN_TODAY) {
+	            toReturn = new Date();
+	            toReturn.setHours(0, 0, 0, 0);
+	            return toReturn;
+	        }
+	        toReturn = this.dateFromComponent.getDate();
+	        return toReturn;
 	    };
 	    // not used by ag-Grid, but exposed as part of the filter API for the client if they want it
 	    DateFilter.prototype.getDateFrom = function () {
@@ -20632,9 +20644,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	var DEFAULT_TRANSLATIONS = {
 	    loadingOoo: 'Loading...',
 	    equals: 'Equals',
+	    custom: 'Custom',
 	    notEqual: 'Not equal',
 	    lessThan: 'Less than',
+	    lessThanToday: 'Less than today',
 	    greaterThan: 'Greater than',
+	    greaterThanToday: 'Greater than today',
 	    inRange: 'In range',
 	    lessThanOrEqual: 'Less than or equals',
 	    greaterThanOrEqual: 'Greater than or equals',
@@ -20772,9 +20787,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    BaseFilter.EQUALS = 'equals';
 	    BaseFilter.NOT_EQUAL = 'notEqual';
+	    BaseFilter.CUSTOM = 'custom';
 	    BaseFilter.LESS_THAN = 'lessThan';
+	    BaseFilter.LESS_THAN_TODAY = 'lessThanToday';
 	    BaseFilter.LESS_THAN_OR_EQUAL = 'lessThanOrEqual';
 	    BaseFilter.GREATER_THAN = 'greaterThan';
+	    BaseFilter.GREATER_THAN_TODAY = 'greaterThanToday';
 	    BaseFilter.GREATER_THAN_OR_EQUAL = 'greaterThanOrEqual';
 	    BaseFilter.IN_RANGE = 'inRange';
 	    BaseFilter.CONTAINS = 'contains'; //1;
@@ -20849,6 +20867,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var filterValueArray = rawFilterValues;
 	            return filterValueArray[0] != null && filterValueArray[1] != null;
 	        }
+	        else if (this.filter === BaseFilter.GREATER_THAN_TODAY) {
+	            return true;
+	        }
+	        else if (this.filter === BaseFilter.LESS_THAN_TODAY) {
+	            return true;
+	        }
 	        else {
 	            return rawFilterValues != null;
 	        }
@@ -20881,8 +20905,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (_this.filter === BaseFilter.EQUALS) {
 	                    return nullValue ? 0 : 1;
 	                }
+	                if (_this.filter === BaseFilter.CUSTOM) {
+	                    return nullValue ? 0 : 1;
+	                }
 	                if (_this.filter === BaseFilter.GREATER_THAN) {
 	                    return nullValue ? 1 : -1;
+	                }
+	                if (_this.filter === BaseFilter.GREATER_THAN_TODAY) {
+	                    return nullValue ? 1 : 1;
 	                }
 	                if (_this.filter === BaseFilter.GREATER_THAN_OR_EQUAL) {
 	                    return nullValue ? 1 : -1;
@@ -20891,6 +20921,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return nullValue ? -1 : 1;
 	                }
 	                if (_this.filter === BaseFilter.LESS_THAN) {
+	                    return nullValue ? -1 : 1;
+	                }
+	                if (_this.filter === BaseFilter.LESS_THAN_TODAY) {
 	                    return nullValue ? -1 : 1;
 	                }
 	                if (_this.filter === BaseFilter.NOT_EQUAL) {
@@ -20925,7 +20958,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (this.filter === BaseFilter.EQUALS) {
 	            return compareResult === 0;
 	        }
+	        if (this.filter === BaseFilter.CUSTOM) {
+	            return compareResult === 0;
+	        }
 	        if (this.filter === BaseFilter.GREATER_THAN) {
+	            return compareResult > 0;
+	        }
+	        if (this.filter === BaseFilter.GREATER_THAN_TODAY) {
 	            return compareResult > 0;
 	        }
 	        if (this.filter === BaseFilter.GREATER_THAN_OR_EQUAL) {
@@ -20935,6 +20974,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return compareResult <= 0;
 	        }
 	        if (this.filter === BaseFilter.LESS_THAN) {
+	            return compareResult < 0;
+	        }
+	        if (this.filter === BaseFilter.LESS_THAN_TODAY) {
 	            return compareResult < 0;
 	        }
 	        if (this.filter === BaseFilter.NOT_EQUAL) {
@@ -24177,7 +24219,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	    };
 	    TextFilter.prototype.getApplicableFilterTypes = function () {
-	        return [baseFilter_1.BaseFilter.EQUALS, baseFilter_1.BaseFilter.NOT_EQUAL, baseFilter_1.BaseFilter.STARTS_WITH, baseFilter_1.BaseFilter.ENDS_WITH,
+	        return [baseFilter_1.BaseFilter.EQUALS, baseFilter_1.BaseFilter.CUSTOM, baseFilter_1.BaseFilter.NOT_EQUAL, baseFilter_1.BaseFilter.STARTS_WITH, baseFilter_1.BaseFilter.ENDS_WITH,
 	            baseFilter_1.BaseFilter.CONTAINS, baseFilter_1.BaseFilter.NOT_CONTAINS];
 	    };
 	    TextFilter.prototype.bodyTemplate = function () {
@@ -24278,6 +24320,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        switch (filter) {
 	            case TextFilter.CONTAINS:
 	                return value.indexOf(filterText) >= 0;
+	            case TextFilter.CUSTOM:
+	                var passed = true;
+	                filterText.split(" ").forEach(function (filterWord) {
+	                    if (value.indexOf(filterWord) < 0) {
+	                        passed = false;
+	                    }
+	                });
+	                return passed;
 	            case TextFilter.NOT_CONTAINS:
 	                return value.indexOf(filterText) === -1;
 	            case TextFilter.EQUALS:
